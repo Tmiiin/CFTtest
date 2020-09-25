@@ -1,37 +1,42 @@
 package com.example.cfttest
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.fragment.app.Fragment
-import com.beust.klaxon.*
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Parser
 import com.example.cfttest.view.CurrencyDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.StringBuilder
-import java.net.HttpURLConnection
+import java.time.LocalDate
 
 class BankPresenter( //for operations with details
     private var mDetailsActivity: ListFragment,
     var sPreferences: SharedPreferences,
-    private var mContext: Context,
-    val connection: HttpURLConnection
+    private var mContext: Context
 ) : Fragment() {
 
     val jsonObjectValute: String = "Valute"
     val TAG = "RatesPresenter"
-    var details: JsonObject? = null
+    var APP_PREFERENCES_DATE: String = "lastReload"
 
-    suspend fun downloadBankDetails(): MutableList<CurrencyDetails>{
-        if(details.isNullOrEmpty()) {
-            if (isValuteSerialize())
+
+    @SuppressLint("NewApi")
+    suspend fun downloadBankDetails(): MutableList<CurrencyDetails> {
+        if (mDetailsActivity.details.isNullOrEmpty()) {
+            if (isValuteSerialize() && LocalDate.now().minusDays(1).isAfter(getSavedDate()))
                 getSavedDetails()
             else {
                 Log.i(TAG, "Started download new exchange rates")
-                val json = BufferedReader(InputStreamReader(connection.inputStream))
+                var connection = Request()
+                val json = BufferedReader(InputStreamReader(connection.getConnection().inputStream))
                 val string = StringBuilder()
                 var stringNow = json.readLine()
                 while (stringNow != null) {
@@ -39,36 +44,44 @@ class BankPresenter( //for operations with details
                     stringNow = json.readLine()
                 }
                 val parser = Parser.default()
+                connection.closeConnection()
                 val thisDetails = parser.parse(string) as JsonObject
-                details = thisDetails[jsonObjectValute] as JsonObject
-                CoroutineScope(Dispatchers.IO).launch{ saveValute(details as JsonObject)}
+                if(thisDetails.containsKey(jsonObjectValute)) {
+                    mDetailsActivity.details = thisDetails[jsonObjectValute] as JsonObject
+                    CoroutineScope(Dispatchers.IO).launch { saveValute(mDetailsActivity.details as JsonObject) }
+                    saveNowDate()
+                }
                 return toArray()
             }
             return toArray()
-        }
-        else return toArray()
+        } else return toArray()
     }
 
-    private fun toArray(): MutableList<CurrencyDetails>{
+    private fun toArray(): MutableList<CurrencyDetails> {
         val listValutes: MutableList<CurrencyDetails> = JsonArray()
-        for(i in details!!.values)
-            listValutes.add(Klaxon().parse<CurrencyDetails>(JsonObject(i as JsonObject).toJsonString())!!)
-        return listValutes
+        return if(!mDetailsActivity.details.isNullOrEmpty()) {
+            for (i in mDetailsActivity.details!!.values)
+                listValutes.add(Klaxon().parse<CurrencyDetails>(JsonObject(i as JsonObject).toJsonString())!!)
+            listValutes
+        } else JsonArray()
     }
 
     private fun saveValute(details: JsonObject) {
-        sPreferences.edit().putString(mDetailsActivity.APP_PREFERENCES, details.toJsonString()).apply()
+        sPreferences.edit().putString(mDetailsActivity.APP_PREFERENCES, details.toJsonString())
+            .apply()
         Log.i(TAG, "Exchange rates was successfully saved")
     }
 
     private fun isValuteSerialize(): Boolean {
-        return sPreferences.contains(mDetailsActivity.APP_PREFERENCES)
+        if(sPreferences.contains(mDetailsActivity.APP_PREFERENCES))
+        return sPreferences.getString(mDetailsActivity.APP_PREFERENCES, "")!!.length > 1
+        else return false
     }
 
     public fun deleteValute() {
         val parser = Parser.default()
-        details = parser.parse(StringBuilder("{}")) as JsonObject
-        sPreferences.edit().remove(mDetailsActivity.APP_PREFERENCES).apply()
+        mDetailsActivity.details = parser.parse(StringBuilder("{}")) as JsonObject
+        sPreferences.edit().putString(mDetailsActivity.APP_PREFERENCES, "").apply()
         Log.i(TAG, "Exchange rates was successfully deleted")
     }
 
@@ -78,11 +91,23 @@ class BankPresenter( //for operations with details
         if (string.isNotEmpty()) {
             val parser = Parser.default()
             try {
-                 details = parser.parse(string) as JsonObject
+                mDetailsActivity.details = parser.parse(string) as JsonObject
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
         }
         /** TO DO: else throw exception*/
+    }
+
+    fun saveNowDate() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            sPreferences.edit().putString(APP_PREFERENCES_DATE, LocalDate.now().toString()).apply()
+        } else throw RuntimeException("can't save date")
+    }
+
+    fun getSavedDate(): LocalDate {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            return LocalDate.parse(sPreferences.getString(APP_PREFERENCES_DATE, ""))
+        } else throw RuntimeException("can't get date")
     }
 }

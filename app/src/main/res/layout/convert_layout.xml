@@ -1,95 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    >
+    android:orientation="vertical"
+    android:padding="16dp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="3"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="3">
+
         <ImageView
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="60dp"
-            android:src="@drawable/logo"
-            />
+            android:layout_weight="1"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/logo" />
 
         <TextView
-            android:layout_width="0dp"
             android:id="@+id/convert_hint"
+            android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_weight="2"
             android:gravity="center_horizontal"
             android:padding="8dp"
             android:textSize="15sp" />
     </LinearLayout>
+
     <TextView
-        android:padding="8dp"
         android:id="@+id/convert_char_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-       />
+        android:padding="8dp" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Текущий курс: " />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" 1 "
-            android:padding="8dp"/>
+            android:text="@string/convert_course" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" : "
-            android:padding="8dp"/>
-    <TextView
-        android:id="@+id/convert_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="120"
-        android:padding="8dp"/>
+            android:padding="8dp"
+            android:text="@string/convert_rub_value" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/convert_separator" />
+
+        <TextView
+            android:id="@+id/convert_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            />
+
         <TextView
             android:id="@+id/convert_nominal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"/>
+            android:padding="8dp" />
     </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="Сколько вы хотите перевести?"
-        />
+        android:text="@string/convert_sum" />
+
     <EditText
         android:id="@+id/convert_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:hint="@string/convert_hint"
         android:padding="8dp"
-        android:hint="Введите количество рублей, которое хотите конвертировать"
-        android:textSize="12sp"/>
+        android:textSize="12sp"
+        android:inputType="number"/>
+
     <Button
         android:id="@+id/convert_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Конвертировать"
-        android:textSize="13sp"/>
+        android:text="@string/convert_button"
+        android:textSize="13sp" />
+
     <TextView
         android:id="@+id/convert_result"
-        android:textSize="25sp"
-        android:padding="8dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textSize="25sp" />
+
     <Button
         android:id="@+id/convert_go_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Вернуться на предыдущую страницу"
-        android:textSize="13sp"/>
+        android:text="@string/go_back"
+        android:textSize="13sp" />
 </LinearLayout>

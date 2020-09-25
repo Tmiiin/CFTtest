@@ -59,7 +59,7 @@
             android:id="@+id/sync"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_margin="16dp"
+            android:layout_margin="26dp"
             android:background="@color/cardview_light_background"
             android:layout_gravity="right|bottom"
             android:src="@drawable/synchronization"/>

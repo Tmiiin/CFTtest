@@ -12,7 +12,10 @@ class Request {
         val url = URL("https://www.cbr-xml-daily.ru/daily_json.js");
         connection = url.openConnection() as HttpURLConnection;
         connection.requestMethod = "GET";
-        connection.connect();
+        //connection.connect();
         return connection
+    }
+    public suspend fun closeConnection(){
+        this.connection.disconnect()
     }
 }

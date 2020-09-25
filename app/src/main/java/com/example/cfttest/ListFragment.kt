@@ -13,6 +13,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
 import com.example.cfttest.convert.ConvertFragment
 import com.example.cfttest.view.CurrencyDetails
 import kotlinx.coroutines.CoroutineScope
@@ -21,8 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 
-class ListFragment(val sPreferences: SharedPreferences, val mContext: Context, val connection: HttpURLConnection): Fragment(), ProgressBarRV, BankAdapter.OnValuteListener{
+class ListFragment(val sPreferences: SharedPreferences, val mContext: Context): Fragment(), ProgressBarRV, BankAdapter.OnValuteListener{
 
+    var details: JsonObject? = null
     lateinit var listView: RecyclerView //rv with details
     private var listOfDetails: MutableList<CurrencyDetails> =
         arrayListOf() //list of bank_material_card-views
@@ -41,7 +44,7 @@ class ListFragment(val sPreferences: SharedPreferences, val mContext: Context, v
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        mPresenter = BankPresenter(this, sPreferences, mContext, connection)
+        mPresenter = BankPresenter(this, sPreferences, mContext)
         rootView = inflater.inflate(R.layout.details_layout, container, false)
         return rootView
     }
@@ -86,7 +89,7 @@ class ListFragment(val sPreferences: SharedPreferences, val mContext: Context, v
 
     override fun onValuteClick(v: View?, position: Int) {
         hideAll(listView, detailsIsEmpty, progressBar)
-        fragmentManager!!.beginTransaction().add(ListFragment(sPreferences, mContext, connection), TAG)
+        fragmentManager!!.beginTransaction().add(ListFragment(sPreferences, mContext), TAG)
             .replace(R.id.details_container, ConvertFragment(v)).addToBackStack(null).commit()
     }
 
