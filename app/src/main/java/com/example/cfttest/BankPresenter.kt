@@ -11,15 +11,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.RuntimeException
 import java.lang.StringBuilder
+import java.net.HttpURLConnection
 
 class BankPresenter( //for operations with details
-    private var mDetailsActivity: BankActivity,
+    private var mDetailsActivity: ListFragment,
     var sPreferences: SharedPreferences,
-    private var mContext: Context
+    private var mContext: Context,
+    val connection: HttpURLConnection
 ) : Fragment() {
 
+    val jsonObjectValute: String = "Valute"
     val TAG = "RatesPresenter"
     var details: JsonObject? = null
 
@@ -29,7 +31,7 @@ class BankPresenter( //for operations with details
                 getSavedDetails()
             else {
                 Log.i(TAG, "Started download new exchange rates")
-                val json = BufferedReader(InputStreamReader(Request().getConnection().inputStream))
+                val json = BufferedReader(InputStreamReader(connection.inputStream))
                 val string = StringBuilder()
                 var stringNow = json.readLine()
                 while (stringNow != null) {
@@ -38,7 +40,7 @@ class BankPresenter( //for operations with details
                 }
                 val parser = Parser.default()
                 val thisDetails = parser.parse(string) as JsonObject
-                details = thisDetails["Valute"] as JsonObject
+                details = thisDetails[jsonObjectValute] as JsonObject
                 CoroutineScope(Dispatchers.IO).launch{ saveValute(details as JsonObject)}
                 return toArray()
             }
